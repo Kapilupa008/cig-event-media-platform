@@ -14,12 +14,24 @@ enum RoleType {
   VIEWER
 }
 
+enum MediaType {
+  IMAGE
+  VIDEO
+}
+
+enum AccessType {
+  PUBLIC
+  PRIVATE
+}
+
 model User {
   id        String   @id @default(cuid())
   name      String
   email     String   @unique
   password  String
   role      RoleType @default(VIEWER)
+
+  uploadedMedia Media[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -32,6 +44,43 @@ model Event {
   category    String
   eventDate   DateTime
 
+  albums      Album[]
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model Album {
+  id          String     @id @default(cuid())
+  title       String
+  description String?
+  accessType  AccessType @default(PUBLIC)
+
+  eventId     String
+  event       Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  media       Media[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Media {
+  id           String    @id @default(cuid())
+  title        String?
+  description  String?
+  mediaType    MediaType
+  fileUrl      String
+  thumbnailUrl String?
+  fileSize     Int?
+  mimeType     String?
+
+  albumId      String
+  album        Album     @relation(fields: [albumId], references: [id], onDelete: Cascade)
+
+  uploadedById String
+  uploadedBy   User      @relation(fields: [uploadedById], references: [id])
+
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 }
