@@ -30,6 +30,9 @@ model User {
   email     String   @unique
   password  String
   role      RoleType @default(VIEWER)
+  likes      Like[]
+  favourites Favourite[]
+  comments   Comment[]
 
   uploadedMedia Media[]
 
@@ -75,6 +78,9 @@ model Media {
   thumbnailUrl String?
   fileSize     Int?
   mimeType     String?
+  likes      Like[]
+  favourites Favourite[]
+  comments   Comment[]
 
   albumId      String
   album        Album     @relation(fields: [albumId], references: [id], onDelete: Cascade)
@@ -84,4 +90,45 @@ model Media {
 
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
+}
+model Like {
+  id        String   @id @default(cuid())
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  mediaId   String
+  media     Media    @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, mediaId])
+}
+
+model Favourite {
+  id        String   @id @default(cuid())
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  mediaId   String
+  media     Media    @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, mediaId])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  mediaId   String
+  media     Media    @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
