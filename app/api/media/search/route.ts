@@ -1,72 +1,72 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
 
-export const runtime = "nodejs";
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const query = searchParams.get("q") || "";
 
-export async function GET() {
   const media = await prisma.media.findMany({
-    orderBy: { createdAt: "desc" },
+    where: {
+      OR: [
+        {
+          title: {
+            contains: query,
+            mode: "insensitive",
+          },
+        },
+        {
+          tags: {
+            has: query,
+          },
+        },
+        {
+          album: {
+            title: {
+              contains: query,
+              mode: "insensitive",
+            },
+          },
+        },
+        {
+          album: {
+            event: {
+              name: {
+                contains: query,
+                mode: "insensitive",
+              },
+            },
+          },
+        },
+        {
+          uploadedBy: {
+            name: {
+              contains: query,
+              mode: "insensitive",
+            },
+          },
+        },
+        {
+          uploadedBy: {
+            email: {
+              contains: query,
+              mode: "insensitive",
+            },
+          },
+        },
+      ],
+    },
     include: {
-      album: { include: { event: true } },
+      album: {
+        include: {
+          event: true,
+        },
+      },
       uploadedBy: true,
+    },
+    orderBy: {
+      createdAt: "desc",
     },
   });
 
   return NextResponse.json(media);
-}
-
-export async function POST(request: Request) {
-  try {
-    const formData = await request.formData();
-
-    const file = formData.get("file") as File | null;
-    const title = formData.get("title") as string;
-    const albumId = formData.get("albumId") as string;
-    const uploadedById = formData.get("uploadedById") as string;
-
-    if (!file || !albumId || !uploadedById) {
-      return NextResponse.json(
-        { error: "File, albumId, and uploadedById are required" },
-        { status: 400 }
-      );
-    }
-
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-
-    const uploadDir = path.join(process.cwd(), "public", "uploads");
-    await mkdir(uploadDir, { recursive: true });
-
-    const safeFileName = `${Date.now()}-${file.name.replace(/\s+/g, "-")}`;
-    const filePath = path.join(uploadDir, safeFileName);
-
-    await writeFile(filePath, buffer);
-
-    const mimeType = file.type;
-    const mediaType = mimeType.startsWith("video") ? "VIDEO" : "IMAGE";
-
-    const media = await prisma.media.create({
-      data: {
-        title,
-        mediaType,
-        fileUrl: `/uploads/${safeFileName}`,
-        fileSize: file.size,
-        mimeType,
-        albumId,
-        uploadedById,
-        tags: ["uploaded"],
-      },
-    });
-
-    return NextResponse.json(media, { status: 201 });
-  } catch (error) {
-    console.error("MEDIA_UPLOAD_ERROR", error);
-
-    return NextResponse.json(
-      { error: "Failed to upload media" },
-      { status: 500 }
-    );
-  }
 }
