@@ -42,6 +42,7 @@ export default function CreateAlbumPage() {
         description,
         accessType,
         eventId,
+        userId: "cmps1sw3k0002xwldgxb16r8h",
       }),
     });
 

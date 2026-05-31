@@ -28,12 +28,25 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
 
-    const { title, description, accessType, eventId } = body;
+    const { title, description, accessType, eventId, userId } = body;
 
-    if (!title || !eventId) {
+    if (!title || !eventId || !userId) {
       return NextResponse.json(
-        { error: "Title and eventId are required" },
+        { error: "Title, eventId, and userId are required" },
         { status: 400 }
+      );
+    }
+
+    const user = await prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!user || !["ADMIN", "PHOTOGRAPHER"].includes(user.role)) {
+      return NextResponse.json(
+        { error: "Only Admins and Photographers can create albums" },
+        { status: 403 }
       );
     }
 

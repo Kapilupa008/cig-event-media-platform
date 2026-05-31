@@ -17,6 +17,17 @@ export async function GET() {
         },
       },
       uploadedBy: true,
+      likes: true,
+      favourites: true,
+      comments: {
+        include: {
+          user: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      },
     },
   });
 
@@ -36,6 +47,19 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: "File, albumId and uploadedById are required" },
         { status: 400 }
+      );
+    }
+
+    const user = await prisma.user.findUnique({
+      where: {
+        id: uploadedById,
+      },
+    });
+
+    if (!user || !["ADMIN", "PHOTOGRAPHER"].includes(user.role)) {
+      return NextResponse.json(
+        { error: "Only Admins and Photographers can upload media" },
+        { status: 403 }
       );
     }
 

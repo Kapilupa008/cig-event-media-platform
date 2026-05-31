@@ -41,7 +41,7 @@ export default function AlbumDetailsPage({
       <p className="text-gray-500 mt-2">{album.description}</p>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-        {album.media.map((item) => (
+        {album.media && album.media.map((item) => (
           <div key={item.id} className="border rounded-lg p-4">
             {item.mediaType === "IMAGE" ? (
               <img
