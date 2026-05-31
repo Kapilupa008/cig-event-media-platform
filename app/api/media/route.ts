@@ -34,12 +34,8 @@ export async function POST(request: Request) {
 
     if (!file || !albumId || !uploadedById) {
       return NextResponse.json(
-        {
-          error: "File, albumId and uploadedById are required",
-        },
-        {
-          status: 400,
-        }
+        { error: "File, albumId and uploadedById are required" },
+        { status: 400 }
       );
     }
 
@@ -47,21 +43,15 @@ export async function POST(request: Request) {
     const buffer = Buffer.from(bytes);
 
     const uploadDir = path.join(process.cwd(), "public", "uploads");
-
-    await mkdir(uploadDir, {
-      recursive: true,
-    });
+    await mkdir(uploadDir, { recursive: true });
 
     const safeFileName = `${Date.now()}-${file.name.replace(/\s+/g, "-")}`;
-
     const filePath = path.join(uploadDir, safeFileName);
 
     await writeFile(filePath, buffer);
 
     const mimeType = file.type;
-    const mediaType = mimeType.startsWith("video")
-      ? "VIDEO"
-      : "IMAGE";
+    const mediaType = mimeType.startsWith("video") ? "VIDEO" : "IMAGE";
 
     const media = await prisma.media.create({
       data: {
@@ -72,12 +62,7 @@ export async function POST(request: Request) {
         mimeType,
         albumId,
         uploadedById,
-
-        // Tags for filtering/search
-        tags: [
-          "uploaded",
-          mediaType.toLowerCase(),
-        ],
+        tags: ["uploaded", mediaType.toLowerCase()],
       },
       include: {
         album: true,
@@ -85,19 +70,13 @@ export async function POST(request: Request) {
       },
     });
 
-    return NextResponse.json(media, {
-      status: 201,
-    });
-  } catch (error) {
+    return NextResponse.json(media, { status: 201 });
+  } catch (error: any) {
     console.error("MEDIA_UPLOAD_ERROR:", error);
 
     return NextResponse.json(
-      {
-        error: "Failed to upload media",
-      },
-      {
-        status: 500,
-      }
+      { error: error?.message || String(error) },
+      { status: 500 }
     );
   }
 }

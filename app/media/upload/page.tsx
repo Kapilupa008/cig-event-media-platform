@@ -58,7 +58,7 @@ export default function UploadMediaPage() {
       body: formData,
     });
 
-   if (response.ok) {
+if (response.ok) {
   setMessage("Media uploaded successfully");
   setFile(null);
   setTitle("");
