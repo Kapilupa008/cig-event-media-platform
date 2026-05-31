@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 interface Album {
@@ -32,14 +33,18 @@ export default function AlbumsPage() {
 
       <div className="grid gap-4">
         {albums.map((album) => (
-          <div key={album.id} className="border rounded-lg p-4 shadow-sm">
+          <Link
+            key={album.id}
+            href={`/albums/${album.id}`}
+            className="border rounded-lg p-4 shadow-sm block hover:bg-gray-900 transition"
+          >
             <h2 className="text-xl font-semibold">{album.title}</h2>
             <p className="text-gray-600">{album.event.name}</p>
             <p>{album.description}</p>
             <p className="text-sm text-gray-500">
               {album.accessType} • {album.media.length} media items
             </p>
-          </div>
+          </Link>
         ))}
       </div>
     </div>

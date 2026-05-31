@@ -71,6 +71,7 @@ model Media {
   description  String?
   mediaType    MediaType
   fileUrl      String
+  tags String[]
   thumbnailUrl String?
   fileSize     Int?
   mimeType     String?
