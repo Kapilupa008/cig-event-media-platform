@@ -26,8 +26,19 @@ export default function AlbumDetailsPage({
 
   useEffect(() => {
     fetch(`/api/albums/${id}`)
-      .then((res) => res.json())
-      .then((data) => setAlbum(data));
+      .then(async (res) => {
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.error || "Failed to load album");
+  }
+
+  setAlbum(data);
+})
+.catch((error) => {
+  setAlbum(null);
+  alert(error.message);
+});
   }, [id]);
 
   if (!album) {

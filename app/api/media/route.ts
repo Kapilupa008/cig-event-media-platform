@@ -1,7 +1,6 @@
 import { prisma } from "@/lib/prisma";
+import cloudinary from "@/lib/cloudinary";
 import { NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
 
 export const runtime = "nodejs";
 
@@ -66,27 +65,57 @@ export async function POST(request: Request) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    const uploadDir = path.join(process.cwd(), "public", "uploads");
-    await mkdir(uploadDir, { recursive: true });
-
-    const safeFileName = `${Date.now()}-${file.name.replace(/\s+/g, "-")}`;
-    const filePath = path.join(uploadDir, safeFileName);
-
-    await writeFile(filePath, buffer);
-
     const mimeType = file.type;
     const mediaType = mimeType.startsWith("video") ? "VIDEO" : "IMAGE";
+
+    const uploadResult = await new Promise<any>((resolve, reject) => {
+      cloudinary.uploader
+        .upload_stream(
+          {
+            folder: "cig-event-media-platform",
+            resource_type: mediaType === "VIDEO" ? "video" : "image",
+          },
+          (error, result) => {
+            if (error) {
+              reject(error);
+              return;
+            }
+
+            resolve(result);
+          }
+        )
+        .end(buffer);
+    });
+
+    const generatedTags = [
+      ...(title || "")
+        .toLowerCase()
+        .split(/[\s_-]+/)
+        .filter(Boolean),
+
+      ...file.name
+        .toLowerCase()
+        .replace(/\.[^/.]+$/, "")
+        .split(/[\s_-]+/)
+        .filter(Boolean),
+
+      mediaType.toLowerCase(),
+      "uploaded",
+      "cloudinary",
+    ];
+
+    const uniqueTags = [...new Set(generatedTags)];
 
     const media = await prisma.media.create({
       data: {
         title,
         mediaType,
-        fileUrl: `/uploads/${safeFileName}`,
+        fileUrl: uploadResult.secure_url,
         fileSize: file.size,
         mimeType,
         albumId,
         uploadedById,
-        tags: ["uploaded", mediaType.toLowerCase()],
+        tags: uniqueTags,
       },
       include: {
         album: true,

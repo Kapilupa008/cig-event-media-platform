@@ -3,7 +3,19 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
+    const currentUser = await prisma.user.findFirst({
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
     const albums = await prisma.album.findMany({
+      where:
+        currentUser && ["ADMIN", "PHOTOGRAPHER"].includes(currentUser.role)
+          ? {}
+          : {
+              accessType: "PUBLIC",
+            },
       orderBy: {
         createdAt: "desc",
       },
