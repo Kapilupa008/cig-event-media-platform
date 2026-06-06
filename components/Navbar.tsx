@@ -1,23 +1,44 @@
+import Link from "next/link";
+import NotificationBell from "./NotificationBell";
+
 export default function Navbar() {
   return (
     <nav className="bg-slate-900 border-b border-slate-800">
       <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
-        <h1 className="text-white text-xl font-bold">
+        <Link href="/" className="text-white text-xl font-bold">
           CIG Media Platform
-        </h1>
+        </Link>
 
-        <div className="flex gap-6 text-slate-300">
-          <button className="hover:text-white">
+        <div className="flex gap-6 text-slate-300 items-center">
+          <Link href="/events" className="hover:text-white">
             Events
-          </button>
+          </Link>
 
-          <button className="hover:text-white">
+          <Link href="/albums" className="hover:text-white">
             Albums
-          </button>
+          </Link>
 
-          <button className="hover:text-white">
-            Login
-          </button>
+          <Link href="/media" className="hover:text-white">
+            Media
+          </Link>
+
+          <Link href="/search" className="hover:text-white">
+            Search
+          </Link>
+
+          <Link href="/favourites" className="hover:text-white">
+            Favourites
+          </Link>
+
+          <Link href="/profile" className="hover:text-white">
+            Profile
+          </Link>
+
+          <Link href="/admin/dashboard" className="hover:text-white">
+            Dashboard
+          </Link>
+
+          <NotificationBell />
         </div>
       </div>
     </nav>

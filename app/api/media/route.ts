@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import cloudinary from "@/lib/cloudinary";
 import { NextResponse } from "next/server";
+import { generateSmartTags } from "@/lib/smartTags";
 
 export const runtime = "nodejs";
 
@@ -87,24 +88,22 @@ export async function POST(request: Request) {
         .end(buffer);
     });
 
-    const generatedTags = [
-      ...(title || "")
-        .toLowerCase()
-        .split(/[\s_-]+/)
-        .filter(Boolean),
+    const album = await prisma.album.findUnique({
+  where: {
+    id: albumId,
+  },
+  include: {
+    event: true,
+  },
+});
 
-      ...file.name
-        .toLowerCase()
-        .replace(/\.[^/.]+$/, "")
-        .split(/[\s_-]+/)
-        .filter(Boolean),
-
-      mediaType.toLowerCase(),
-      "uploaded",
-      "cloudinary",
-    ];
-
-    const uniqueTags = [...new Set(generatedTags)];
+const uniqueTags = generateSmartTags({
+  title: title || "",
+  fileName: file.name,
+  mediaType: mediaType.toLowerCase(),
+  eventName: album?.event?.name,
+  category: album?.event?.category,
+});
 
     const media = await prisma.media.create({
       data: {

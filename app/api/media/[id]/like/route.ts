@@ -30,12 +30,30 @@ export async function POST(
     return NextResponse.json({ liked: false });
   }
 
-  await prisma.like.create({
+  const like = await prisma.like.create({
+  data: {
+    userId,
+    mediaId: id,
+  },
+});
+
+const media = await prisma.media.findUnique({
+  where: {
+    id,
+  },
+});
+
+if (media && media.uploadedById !== userId) {
+  await prisma.notification.create({
     data: {
-      userId,
-      mediaId: id,
+      userId: media.uploadedById,
+      message: "Someone liked your media.",
     },
   });
+}
 
-  return NextResponse.json({ liked: true });
+return NextResponse.json({
+  liked: true,
+  like,
+});
 }

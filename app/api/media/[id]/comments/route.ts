@@ -26,7 +26,6 @@ export async function GET(
 
   return NextResponse.json(comments);
 }
-
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -49,6 +48,21 @@ export async function POST(
       },
     },
   });
+
+  const media = await prisma.media.findUnique({
+    where: {
+      id,
+    },
+  });
+
+  if (media && media.uploadedById !== userId) {
+    await prisma.notification.create({
+      data: {
+        userId: media.uploadedById,
+        message: "Someone commented on your media.",
+      },
+    });
+  }
 
   return NextResponse.json(comment, { status: 201 });
 }
