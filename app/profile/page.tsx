@@ -30,7 +30,7 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
 
   useEffect(() => {
-    fetch("/api/profile")
+    fetch("/api/profile?email=admin@test.com")
       .then((res) => res.json())
       .then((data) => setProfile(data));
   }, []);
