@@ -1,24 +1,21 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const user = await prisma.user.findFirst({
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get("userId");
 
-    if (!user) {
+    if (!userId) {
       return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
+        { error: "userId is required" },
+        { status: 400 }
       );
     }
 
     const notifications = await prisma.notification.findMany({
       where: {
-        userId: user.id,
+        userId,
       },
       orderBy: {
         createdAt: "desc",

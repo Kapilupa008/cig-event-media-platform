@@ -13,7 +13,15 @@ export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
   useEffect(() => {
-    fetch("/api/notifications")
+    const currentUser = localStorage.getItem("currentUser");
+
+if (!currentUser) {
+  return;
+}
+
+const user = JSON.parse(currentUser);
+
+fetch(`/api/notifications?userId=${user.id}`)
       .then((res) => res.json())
       .then((data) => setNotifications(data));
   }, []);
