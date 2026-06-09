@@ -5,18 +5,40 @@ import { useEffect, useState } from "react";
 import NotificationBell from "./NotificationBell";
 
 interface User {
+  id: string;
+  name: string;
+  email: string;
   role: string;
 }
 
 export default function Navbar() {
   const [user, setUser] = useState<User | null>(null);
 
+  function loadUser() {
+    const stored = localStorage.getItem("currentUser");
+
+    if (stored) {
+      setUser(JSON.parse(stored));
+    } else {
+      setUser(null);
+    }
+  }
+
   useEffect(() => {
-    fetch("/api/auth/me")
-      .then((res) => res.json())
-      .then((data) => setUser(data))
-      .catch(() => setUser(null));
+    loadUser();
+
+    window.addEventListener("userChanged", loadUser);
+
+    return () => {
+      window.removeEventListener("userChanged", loadUser);
+    };
   }, []);
+
+  function logout() {
+    localStorage.removeItem("currentUser");
+    setUser(null);
+    window.location.href = "/login";
+  }
 
   const isAdmin = user?.role === "ADMIN";
   const canCreateMedia = user?.role === "ADMIN" || user?.role === "PHOTOGRAPHER";
@@ -67,9 +89,11 @@ export default function Navbar() {
             Favourites
           </Link>
 
-          <Link href="/profile" className="hover:text-white">
-            Profile
-          </Link>
+          {user && (
+            <Link href="/profile" className="hover:text-white">
+              Profile
+            </Link>
+          )}
 
           {isAdmin && (
             <Link href="/admin/dashboard" className="hover:text-white">
@@ -77,7 +101,29 @@ export default function Navbar() {
             </Link>
           )}
 
-          <NotificationBell />
+          {user ? (
+            <>
+              <span className="text-white text-sm">
+                {user.name} ({user.role})
+              </span>
+
+              <button onClick={logout} className="hover:text-white">
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <Link href="/login" className="hover:text-white">
+                Login
+              </Link>
+
+              <Link href="/register" className="hover:text-white">
+                Register
+              </Link>
+            </>
+          )}
+
+          {user && <NotificationBell />}
         </div>
       </div>
     </nav>
