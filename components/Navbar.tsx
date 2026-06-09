@@ -41,7 +41,10 @@ export default function Navbar() {
   }
 
   const isAdmin = user?.role === "ADMIN";
-  const canCreateMedia = user?.role === "ADMIN" || user?.role === "PHOTOGRAPHER";
+  const canCreateMedia =
+  user?.role === "ADMIN" ||
+  user?.role === "PHOTOGRAPHER" ||
+  user?.role === "VIEWER";
 
   return (
     <nav className="bg-slate-900 border-b border-slate-800">
