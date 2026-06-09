@@ -1,7 +1,26 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import NotificationBell from "./NotificationBell";
 
+interface User {
+  role: string;
+}
+
 export default function Navbar() {
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((res) => res.json())
+      .then((data) => setUser(data))
+      .catch(() => setUser(null));
+  }, []);
+
+  const isAdmin = user?.role === "ADMIN";
+  const canCreateMedia = user?.role === "ADMIN" || user?.role === "PHOTOGRAPHER";
+
   return (
     <nav className="bg-slate-900 border-b border-slate-800">
       <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
@@ -14,25 +33,31 @@ export default function Navbar() {
             Events
           </Link>
 
-          <Link href="/events/create" className="hover:text-white">
-            Create Event
-          </Link>
+          {isAdmin && (
+            <Link href="/events/create" className="hover:text-white">
+              Create Event
+            </Link>
+          )}
 
           <Link href="/albums" className="hover:text-white">
             Albums
           </Link>
 
-          <Link href="/albums/create" className="hover:text-white">
-            Create Album
-          </Link>
+          {canCreateMedia && (
+            <Link href="/albums/create" className="hover:text-white">
+              Create Album
+            </Link>
+          )}
 
           <Link href="/media" className="hover:text-white">
             Media
           </Link>
 
-          <Link href="/media/upload" className="hover:text-white">
-            Upload
-          </Link>
+          {canCreateMedia && (
+            <Link href="/media/upload" className="hover:text-white">
+              Upload
+            </Link>
+          )}
 
           <Link href="/search" className="hover:text-white">
             Search
@@ -46,9 +71,11 @@ export default function Navbar() {
             Profile
           </Link>
 
-          <Link href="/admin/dashboard" className="hover:text-white">
-            Dashboard
-          </Link>
+          {isAdmin && (
+            <Link href="/admin/dashboard" className="hover:text-white">
+              Dashboard
+            </Link>
+          )}
 
           <NotificationBell />
         </div>

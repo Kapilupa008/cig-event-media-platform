@@ -27,12 +27,25 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
 
-    const { name, description, category, eventDate } = body;
+    const { name, description, category, eventDate, userId } = body;
 
-    if (!name || !category || !eventDate) {
+    if (!name || !category || !eventDate || !userId) {
       return NextResponse.json(
-        { error: "Name, category, and event date are required" },
+        { error: "Name, category, event date, and userId are required" },
         { status: 400 }
+      );
+    }
+
+    const user = await prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!user || user.role !== "ADMIN") {
+      return NextResponse.json(
+        { error: "Only Admins can create events" },
+        { status: 403 }
       );
     }
 
