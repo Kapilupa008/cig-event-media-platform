@@ -72,4 +72,4 @@ export default function LoginPage() {
       {message && <p className="mt-4">{message}</p>}
     </div>
   );
-}
+} 
