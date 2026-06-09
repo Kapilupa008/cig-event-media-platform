@@ -14,13 +14,22 @@ export default function Navbar() {
             Events
           </Link>
 
+          <Link href="/events/create" className="hover:text-white">
+            Create Event
+          </Link>
+
           <Link href="/albums" className="hover:text-white">
             Albums
+          </Link>
+
+          <Link href="/albums/create" className="hover:text-white">
+            Create Album
           </Link>
 
           <Link href="/media" className="hover:text-white">
             Media
           </Link>
+
           <Link href="/media/upload" className="hover:text-white">
             Upload
           </Link>
