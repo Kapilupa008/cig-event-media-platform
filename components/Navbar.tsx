@@ -21,6 +21,9 @@ export default function Navbar() {
           <Link href="/media" className="hover:text-white">
             Media
           </Link>
+          <Link href="/media/upload" className="hover:text-white">
+            Upload
+          </Link>
 
           <Link href="/search" className="hover:text-white">
             Search
