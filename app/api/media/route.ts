@@ -56,7 +56,7 @@ export async function POST(request: Request) {
       },
     });
 
-    if (!user || !["ADMIN", "PHOTOGRAPHER"].includes(user.role)) {
+    if (!user || !["ADMIN", "PHOTOGRAPHER", "VIEWER"].includes(user.role)) {
       return NextResponse.json(
         { error: "Only Admins and Photographers can upload media" },
         { status: 403 }

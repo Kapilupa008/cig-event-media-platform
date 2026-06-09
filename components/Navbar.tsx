@@ -41,10 +41,14 @@ export default function Navbar() {
   }
 
   const isAdmin = user?.role === "ADMIN";
-  const canCreateMedia =
-  user?.role === "ADMIN" ||
-  user?.role === "PHOTOGRAPHER" ||
-  user?.role === "VIEWER";
+
+  const canCreateAlbum =
+    user?.role === "ADMIN" || user?.role === "PHOTOGRAPHER";
+
+  const canUploadMedia =
+    user?.role === "ADMIN" ||
+    user?.role === "PHOTOGRAPHER" ||
+    user?.role === "VIEWER";
 
   return (
     <nav className="bg-slate-900 border-b border-slate-800">
@@ -68,7 +72,7 @@ export default function Navbar() {
             Albums
           </Link>
 
-          {canCreateMedia && (
+          {canCreateAlbum && (
             <Link href="/albums/create" className="hover:text-white">
               Create Album
             </Link>
@@ -78,7 +82,7 @@ export default function Navbar() {
             Media
           </Link>
 
-          {canCreateMedia && (
+          {canUploadMedia && (
             <Link href="/media/upload" className="hover:text-white">
               Upload
             </Link>
