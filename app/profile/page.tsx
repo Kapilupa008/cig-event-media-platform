@@ -30,10 +30,18 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
 
   useEffect(() => {
-    fetch("/api/profile?email=admin@test.com")
-      .then((res) => res.json())
-      .then((data) => setProfile(data));
-  }, []);
+  const currentUser = localStorage.getItem("currentUser");
+
+  if (!currentUser) {
+    return;
+  }
+
+  const user = JSON.parse(currentUser);
+
+  fetch(`/api/profile?email=${user.email}`)
+    .then((res) => res.json())
+    .then((data) => setProfile(data));
+}, []);
 
   if (!profile) {
     return <div className="p-8">Loading profile...</div>;
