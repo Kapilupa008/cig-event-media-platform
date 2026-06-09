@@ -12,6 +12,15 @@ export default function CreateEventPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
+    const currentUser = localStorage.getItem("currentUser");
+
+    if (!currentUser) {
+      setMessage("Please login first");
+      return;
+    }
+
+    const user = JSON.parse(currentUser);
+
     const response = await fetch("/api/events", {
       method: "POST",
       headers: {
@@ -22,6 +31,7 @@ export default function CreateEventPage() {
         description,
         category,
         eventDate,
+        userId: user.id,
       }),
     });
 
@@ -43,13 +53,33 @@ export default function CreateEventPage() {
       <h1 className="text-2xl font-bold mb-4">Create Event</h1>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <input className="border p-2 rounded" placeholder="Event name" value={name} onChange={(e) => setName(e.target.value)} />
+        <input
+          className="border p-2 rounded"
+          placeholder="Event name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
 
-        <textarea className="border p-2 rounded" placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} />
+        <textarea
+          className="border p-2 rounded"
+          placeholder="Description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
 
-        <input className="border p-2 rounded" placeholder="Category" value={category} onChange={(e) => setCategory(e.target.value)} />
+        <input
+          className="border p-2 rounded"
+          placeholder="Category"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+        />
 
-        <input className="border p-2 rounded" type="datetime-local" value={eventDate} onChange={(e) => setEventDate(e.target.value)} />
+        <input
+          className="border p-2 rounded"
+          type="datetime-local"
+          value={eventDate}
+          onChange={(e) => setEventDate(e.target.value)}
+        />
 
         <button className="bg-blue-600 text-white p-2 rounded" type="submit">
           Create Event
