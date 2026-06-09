@@ -7,13 +7,22 @@ interface Event {
   name: string;
 }
 
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+}
+
 export default function CreateAlbumPage() {
   const [events, setEvents] = useState<Event[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [accessType, setAccessType] = useState("PUBLIC");
   const [eventId, setEventId] = useState("");
+  const [userId, setUserId] = useState("");
 
   const [message, setMessage] = useState("");
 
@@ -27,10 +36,30 @@ export default function CreateAlbumPage() {
           setEventId(data[0].id);
         }
       });
+
+    fetch("/api/users")
+      .then((res) => res.json())
+      .then((data) => {
+        const allowedUsers = data.filter(
+          (user: User) =>
+            user.role === "ADMIN" || user.role === "PHOTOGRAPHER"
+        );
+
+        setUsers(allowedUsers);
+
+        if (allowedUsers.length > 0) {
+          setUserId(allowedUsers[0].id);
+        }
+      });
   }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+
+    if (!userId) {
+      setMessage("No Admin or Photographer user available");
+      return;
+    }
 
     const response = await fetch("/api/albums", {
       method: "POST",
@@ -42,17 +71,17 @@ export default function CreateAlbumPage() {
         description,
         accessType,
         eventId,
-        userId: "cmps1sw3k0002xwldgxb16r8h",
+        userId,
       }),
     });
 
     if (response.ok) {
       setMessage("Album created successfully");
-
       setTitle("");
       setDescription("");
     } else {
-      setMessage("Failed to create album");
+      const data = await response.json();
+      setMessage(data.error || "Failed to create album");
     }
   }
 
@@ -62,10 +91,7 @@ export default function CreateAlbumPage() {
         Create Album
       </h1>
 
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-4"
-      >
+      <form onSubmit={handleSubmit} className="space-y-4">
         <input
           type="text"
           placeholder="Album Title"
@@ -77,41 +103,39 @@ export default function CreateAlbumPage() {
         <textarea
           placeholder="Description"
           value={description}
-          onChange={(e) =>
-            setDescription(e.target.value)
-          }
+          onChange={(e) => setDescription(e.target.value)}
           className="border p-2 rounded w-full"
         />
 
         <select
           value={accessType}
-          onChange={(e) =>
-            setAccessType(e.target.value)
-          }
+          onChange={(e) => setAccessType(e.target.value)}
           className="border p-2 rounded w-full"
         >
-          <option value="PUBLIC">
-            PUBLIC
-          </option>
-
-          <option value="PRIVATE">
-            PRIVATE
-          </option>
+          <option value="PUBLIC">PUBLIC</option>
+          <option value="PRIVATE">PRIVATE</option>
         </select>
 
         <select
           value={eventId}
-          onChange={(e) =>
-            setEventId(e.target.value)
-          }
+          onChange={(e) => setEventId(e.target.value)}
           className="border p-2 rounded w-full"
         >
           {events.map((event) => (
-            <option
-              key={event.id}
-              value={event.id}
-            >
+            <option key={event.id} value={event.id}>
               {event.name}
+            </option>
+          ))}
+        </select>
+
+        <select
+          value={userId}
+          onChange={(e) => setUserId(e.target.value)}
+          className="border p-2 rounded w-full"
+        >
+          {users.map((user) => (
+            <option key={user.id} value={user.id}>
+              {user.name} ({user.email}) - {user.role}
             </option>
           ))}
         </select>
@@ -124,11 +148,7 @@ export default function CreateAlbumPage() {
         </button>
       </form>
 
-      {message && (
-        <p className="mt-4">
-          {message}
-        </p>
-      )}
+      {message && <p className="mt-4">{message}</p>}
     </div>
   );
 }
